@@ -1,0 +1,183 @@
+import json
+
+class GeneOntology(object):
+
+    def __init__(self, path):
+        self.path = path
+        self.total = []
+
+    # Use a dictionary to remove extra values to Simplified procedure
+    # def rebuild_list(self,record_name):
+    #     records = {id,is_a}
+    #
+    #     list = rebuile_list('HEADER'')
+    #     records.get(record_name)
+
+
+    # Define a function to read and store data
+    def read_storage_data(self):
+
+        id = []         #Use a dictionary to store each keyword
+        id_number = ""  # Store the value of each row as a string
+
+        name = []
+        name_number = ""
+        
+        namespace = []
+        namespace_number = ""
+
+        # There is a place where the keyword “def” conflicts, so I want to change the name here.
+        DEF = []
+        DEF_number = ""
+        
+        synonym = []
+        synonym_list = []
+        
+        relationship = []
+        relationship_number = ""
+        
+        xref = []
+        xref_number = ""
+
+        is_a = []
+        is_a_list = []  # A field name may have multiple values, so it is stored in the form of a “list”.
+
+        disjoint_from = []
+        disjoint_from_number = ""
+        
+        created_by = []
+        created_by_number = ""
+
+        creation_date = []
+        creation_date_number = ""
+        
+        newdic = {}
+        result = []
+        f = open(self.path, 'r', encoding="utf-8")
+        for line in f.readlines():
+            lable = line.split(":")[0]        # Read the list ‘name’, starting from the position of '0', ending with ":", reading all field names
+
+            # View the name of the list that was read
+
+            # print(lable)
+
+            # Start to judge
+
+            if lable == "id":                 # Judge the label for storage
+                id_number = line[3:].strip()  # Remove the label and colon, occupy 3 positions, and strip() is used to remove the trailing spaces.
+
+            elif lable == "def":
+                DEF_number = line[5:].strip()
+
+            elif lable == "namespace":
+                namespace_number = line[10:].strip()
+
+            elif lable == "xref":
+                xref_number = line[5:].strip()
+
+            elif lable == "name":
+                name_number = line[5:].strip()
+
+            elif lable == "disjoint_from":
+                disjoint_from_number = line[14:].strip()
+
+            elif lable == "relationship":
+                relationship_number = line[13:].strip()
+
+            elif lable == "created_by":
+                created_by_number = line[11:].strip()
+
+            elif lable == "creation_date":
+                creation_date_number = line[14:].strip()
+
+            elif lable == "is_a":
+                is_a_list.append(line[5:].strip().split('\n'))
+
+            elif lable == "synonym":
+                synonym_list.append(line[8:].strip().split('\n'))
+
+
+            # Put "[" as the end of the store.
+            # If you want to "[" as the beginning of your storage, you will have to change the storage format of the data.
+
+            elif line[0] == "[":
+
+                # Assign values and store the data in newdic[]
+
+                newdic["id"] = id_number
+
+                newdic["name"] = name_number
+
+                newdic["namespace"] = namespace_number
+                
+                newdic["def"] = DEF_number
+
+                newdic["synonym"] = synonym_list
+
+                newdic["relationship"] = relationship_number
+
+                newdic["xref"] = xref_number
+
+                newdic["is_a"] = is_a_list
+
+                newdic["disjoint_from"] = disjoint_from_number
+                
+                newdic["created_by"] = created_by_number
+
+                newdic["creation_date"] = creation_date_number
+                result.append(newdic)
+
+                # Save newdic in the total data set
+                self.total.append(result)
+
+                # Initialize all new tags
+                id = []        #Use a dictionary to store each keyword
+                id_number = ""  # Store the value of each row as a string
+
+                name = []
+                name_number = ""
+
+                namespace = []
+                namespace_number = ""
+
+                # There is a place where the keyword “def” conflicts, so I want to change the name here.
+                DEF = []
+                DEF_number = ""
+
+                synonym = []
+                synonym_list = []
+
+                relationship = []
+                relationship_number = ""
+
+                xref = []
+                xref_number = ""
+
+                is_a = []
+                is_a_list = []  # A field name may have multiple values, so it is stored in the form of a “list”.
+
+                disjoint_from = []
+                disjoint_from_number = ""
+
+                created_by = []
+                created_by_number = ""
+
+                creation_date = []
+                creation_date_number = ""
+                
+                # Initialize newdic
+                newdic = {}
+                result = []
+            # total.append(newdic)
+        # self.total.append(newdic)             #You append an empty newdic, so there is an empty one behind []
+
+
+if __name__ == "__main__":
+    class1 = GeneOntology('E:\CTD\CTD_exposure_ontology.obo.txt')
+    class1.read_storage_data()
+    print(class1.total)
+
+    jsObj = json.dumps(class1.total)
+    fileObject = open('E:\CTD\CTD_exposure_ontology.obo1.json', 'w')
+    fileObject.write(jsObj)
+    fileObject.close()
