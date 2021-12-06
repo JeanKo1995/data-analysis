@@ -6,14 +6,6 @@ class GeneOntology(object):
         self.path = path
         self.total = []
 
-    # Use a dictionary to remove extra values to Simplified procedure
-    # def rebuild_list(self,record_name):
-    #     records = {id,is_a}
-    #
-    #     list = rebuile_list('HEADER'')
-    #     records.get(record_name)
-
-
     # Define a function to read and store data
     def read_storage_data(self):
 
@@ -51,7 +43,7 @@ class GeneOntology(object):
         creation_date = []
         creation_date_number = ""
         
-        newdic = {}
+        newdic = {}  #Use a dictionary to store each keyword
         result = []
         f = open(self.path, 'r', encoding="utf-8")
         for line in f.readlines():
@@ -131,7 +123,7 @@ class GeneOntology(object):
                 self.total.append(result)
 
                 # Initialize all new tags
-                id = []        #Use a dictionary to store each keyword
+                id = []        
                 id_number = ""  # Store the value of each row as a string
 
                 name = []
