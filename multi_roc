@@ -1,0 +1,75 @@
+import numpy as np
+import pandas as pd
+import sys
+import os 
+import matplotlib.pyplot as plt
+import sklearn.utils._typedefs
+from sklearn import svm, datasets
+from sklearn.metrics import roc_curve, auc, confusion_matrix   ###计算roc和auc
+
+from sklearn.model_selection import cross_val_score,train_test_split 
+
+class Multi_Roc_Function():
+    def __init__(self,inputfile,svm) :
+        self.inputfile = inputfile
+        self.svm = svm
+    def calculate_metric(self,gt, pred): 
+        pred[pred>=0.5]=1
+        pred[pred<0.5]=0
+        confusion = confusion_matrix(gt,pred)
+        TP = confusion[1, 1]
+        TN = confusion[0, 0]
+        FP = confusion[0, 1]
+        FN = confusion[1, 0]
+        sensitivity = TP / float(TP+FN)
+        specificity = TN / float(TN+FP)
+        return  sensitivity, specificity
+    def file_deal_roc(self):
+        df=pd.read_excel(self.inputfile)#输入为excel文件
+        X = df.iloc[:,1:-1]
+        y = df.target
+
+        X, y = X[y != 2], y[y != 2]
+
+        # Add noisy features to make the problem harder
+        random_state = np.random.RandomState(0)
+        n_samples, n_features = X.shape
+        X = np.c_[X, random_state.randn(n_samples, 200 * n_features)]
+        # shuffle and split training and test sets
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=.3,random_state=0)
+        svm = self.svm
+        svm_model = svm.SVC(kernel='linear', probability=True,random_state=random_state)
+        y_score = svm_model.fit(X_train, y_train).decision_function(X_test)
+   
+        fpr,tpr,threshold = roc_curve(y_test, y_score) ###计算真正率和假正率
+        #sensitivity = recall_score(y_test, y_score, average='weighted')
+        roc_auc = auc(fpr,tpr) 
+        #print(fpr.shape, tpr.shape, threshold.shape)
+
+
+        y_pred = svm_model.fit(X_train, y_train).decision_function(X)
+        sensitivity, specificity = self.calculate_metric(y, y_pred)
+        specificity
+
+        plt.figure()
+        plt.figure(figsize=(10,10))
+        plt.plot(fpr, tpr, color='tomato', 
+                lw=3, label='AUC = %0.3f\nSpecificity = %0.3f\nSensitivity = %0.3f' % (roc_auc,specificity,sensitivity)) ###假正率为横坐标，真正率为纵坐标做曲线
+        plt.plot([0, 1], [0, 1], color='skyblue', lw=2)
+        plt.rcParams.update({"font.size":15}) #此处必须添加此句代码方可改变标题字体大小
+        plt.xlim([0.0, 1.0])
+        plt.ylim([0.0, 1.05])
+        plt.xlabel('False positive rate',fontsize=20)
+        plt.ylabel('True positive rate',fontsize=20)
+        plt.title('multi_ROC',fontsize=25)
+        plt.legend(loc="lower right")
+        #plt.show()
+        plt.savefig("multi_ROC.pdf")
+        plt.savefig("multi_ROC.png")
+        plt.savefig("multi_ROC.svg")
+        plt.close()
+
+if __name__ == "__main__":
+    file = "input.xlsx"
+    Muti_Roc = Multi_Roc_Function(file,svm)
+    Muti_Roc.file_deal_roc()
